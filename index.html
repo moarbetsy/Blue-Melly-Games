@@ -31,9 +31,17 @@
     <link rel="preconnect" href="https://www.youtube.com" />
     <link rel="preconnect" href="https://i.ytimg.com" />
     <link
+      rel="preload"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      />
+    </noscript>
     <script defer src="https://cdn.tailwindcss.com"></script>
     <script async src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 
@@ -51,7 +59,7 @@
       body {
         width: 100%;
         min-height: 100%;
-        font-family: "Inter", sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         color: #ffffff;
         background-color: #000000;
         overflow-x: hidden;
@@ -124,14 +132,7 @@
       }
 
       /* ==========================================================
-         5. COMPONENTS — Accordion
-         ========================================================== */
-      .flex-accordion {
-        transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      /* ==========================================================
-         6. COMPONENTS — Video background
+         5. COMPONENTS — Video background
          ========================================================== */
       .video-background-wrapper {
         position: absolute;
@@ -243,7 +244,14 @@
       }
 
       /* ==========================================================
-         9. YOUTUBE FACADE — Click-to-play thumbnail
+         9. CLS FIX — Games section reserve space
+         ========================================================== */
+      #games .grid {
+        min-height: 28rem;
+      }
+
+      /* ==========================================================
+         10. YOUTUBE FACADE — Click-to-play thumbnail
          ========================================================== */
       .video-facade {
         position: absolute;
@@ -256,6 +264,10 @@
         background-size: cover;
         background-position: center;
         z-index: 0;
+      }
+
+      .video-facade:hover .video-facade-play {
+        opacity: 1;
       }
 
       .video-facade-play {
@@ -272,6 +284,7 @@
         justify-content: center;
         opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: none;
       }
 
       .video-facade-play::after {
@@ -403,7 +416,7 @@
           class="video-facade"
           role="button"
           aria-label="Play background video"
-          tabindex="-1"
+          tabindex="0"
           style="background-image: url('https://i.ytimg.com/vi/h7MYJghRWt0/maxresdefault.jpg')"
         >
           <div class="video-facade-play"></div>
@@ -588,28 +601,41 @@
             loader.style.display = "none";
           }, 700);
           startTypingSequence();
-          loadYouTubeVideo();
+          initYouTubeFacade();
         }, 1000);
       });
 
-      // --- YouTube Facade: load real iframe after page is ready ---
-      function loadYouTubeVideo() {
+      // --- YouTube Facade: load iframe only on user click (or Enter/Space) ---
+      function initYouTubeFacade() {
         var facade = document.getElementById("youtube-facade");
         if (!facade) return;
-        var wrapper = facade.parentElement;
-        var iframe = document.createElement("iframe");
-        iframe.id = "youtube-player";
-        iframe.className = "video-iframe";
-        iframe.src =
-          "https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=9";
-        iframe.title = "Background Video";
-        iframe.allow =
-          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.allowFullscreen = true;
-        iframe.tabIndex = -1;
-        wrapper.appendChild(iframe);
-        // Remove facade once iframe starts loading
-        facade.remove();
+        function playVideo() {
+          facade.removeEventListener("click", handlePlay);
+          facade.removeEventListener("keydown", handleKeydown);
+          var wrapper = facade.parentElement;
+          var iframe = document.createElement("iframe");
+          iframe.id = "youtube-player";
+          iframe.className = "video-iframe";
+          iframe.src =
+            "https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=9";
+          iframe.title = "Background Video";
+          iframe.allow =
+            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          iframe.tabIndex = -1;
+          wrapper.appendChild(iframe);
+          facade.remove();
+        }
+        function handlePlay(e) {
+          if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+          if (e.type === "keydown") e.preventDefault();
+          playVideo();
+        }
+        function handleKeydown(e) {
+          if (e.key === "Enter" || e.key === " ") handlePlay(e);
+        }
+        facade.addEventListener("click", handlePlay);
+        facade.addEventListener("keydown", handleKeydown);
       }
 
       function startTypingSequence() {

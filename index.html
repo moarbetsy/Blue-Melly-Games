@@ -408,19 +408,18 @@
 
     <!-- ===== Section 1: Hero ===== -->
     <header id="nexus" class="relative flex h-screen flex-col overflow-hidden bg-black">
-      <!-- YouTube Video Background (Facade: loads on interaction to save ~10 MB) -->
+      <!-- YouTube Video Background (auto-plays muted) -->
       <div class="video-background-wrapper">
         <div class="video-overlay opacity-60"></div>
-        <div
-          id="youtube-facade"
-          class="video-facade"
-          role="button"
-          aria-label="Play background video"
-          tabindex="0"
-          style="background-image: url('https://i.ytimg.com/vi/h7MYJghRWt0/maxresdefault.jpg')"
-        >
-          <div class="video-facade-play"></div>
-        </div>
+        <iframe
+          id="youtube-player"
+          class="video-iframe"
+          src="https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=9"
+          title="Background Video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          tabindex="-1"
+        ></iframe>
       </div>
 
       <!-- Gradient overlay for text readability -->
@@ -601,42 +600,8 @@
             loader.style.display = "none";
           }, 700);
           startTypingSequence();
-          initYouTubeFacade();
         }, 1000);
       });
-
-      // --- YouTube Facade: load iframe only on user click (or Enter/Space) ---
-      function initYouTubeFacade() {
-        var facade = document.getElementById("youtube-facade");
-        if (!facade) return;
-        function playVideo() {
-          facade.removeEventListener("click", handlePlay);
-          facade.removeEventListener("keydown", handleKeydown);
-          var wrapper = facade.parentElement;
-          var iframe = document.createElement("iframe");
-          iframe.id = "youtube-player";
-          iframe.className = "video-iframe";
-          iframe.src =
-            "https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=9";
-          iframe.title = "Background Video";
-          iframe.allow =
-            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          iframe.allowFullscreen = true;
-          iframe.tabIndex = -1;
-          wrapper.appendChild(iframe);
-          facade.remove();
-        }
-        function handlePlay(e) {
-          if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
-          if (e.type === "keydown") e.preventDefault();
-          playVideo();
-        }
-        function handleKeydown(e) {
-          if (e.key === "Enter" || e.key === " ") handlePlay(e);
-        }
-        facade.addEventListener("click", handlePlay);
-        facade.addEventListener("keydown", handleKeydown);
-      }
 
       function startTypingSequence() {
         var text1 = "BLUE MELLY GAMES.";

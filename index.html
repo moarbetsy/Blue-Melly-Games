@@ -21,7 +21,8 @@
         font-src 'self' https://fonts.gstatic.com;
         img-src 'self' data: https: ;
         frame-src https://www.youtube.com https://www.google.com;
-        connect-src 'self' https://api.iconify.design https://cdn.tailwindcss.com https://*.youtube.com https://*.google.com;
+        connect-src 'self' https://api.iconify.design https://cdn.tailwindcss.com https://*.youtube.com https://*.google.com https://formsubmit.co;
+        form-action 'self' https://formsubmit.co https://formsubmit.co/el/koduso;
         media-src 'self' https://*.googlevideo.com;"
     />
 
@@ -307,6 +308,55 @@
           opacity: 0;
         }
       }
+
+      /* ==========================================================
+         11. BETA MODAL & TOAST
+         ========================================================== */
+      #beta-modal {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      #beta-modal.beta-modal-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .beta-honeypot {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+      #beta-thanks-toast {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+      #beta-thanks-toast.beta-toast-hidden {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+      }
+
+      /* ==========================================================
+         12. REDUCED MOTION — Safe defaults
+         ========================================================== */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .video-iframe {
+          animation: none;
+          opacity: 1;
+        }
+        .scan-line,
+        .typing-cursor::after {
+          animation: none;
+        }
+        .mobile-link-item {
+          transition: none;
+          transform: none;
+          opacity: 1;
+        }
+      }
     </style>
   </head>
 
@@ -338,12 +388,75 @@
       >
         <!-- Logo -->
         <a href="#" class="group relative z-50 flex items-center gap-2">
+          <svg
+            class="h-7 w-7 transition-transform group-hover:scale-110"
+            viewBox="0 0 100 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Gummy Bear Body -->
+            <ellipse
+              cx="50"
+              cy="70"
+              rx="35"
+              ry="40"
+              fill="#06b6d4"
+              opacity="0.9"
+            />
+            <!-- Head -->
+            <ellipse
+              cx="50"
+              cy="30"
+              rx="28"
+              ry="32"
+              fill="#06b6d4"
+              opacity="0.9"
+            />
+            <!-- Left Ear -->
+            <ellipse
+              cx="30"
+              cy="20"
+              rx="12"
+              ry="14"
+              fill="#06b6d4"
+              opacity="0.9"
+            />
+            <!-- Right Ear -->
+            <ellipse
+              cx="70"
+              cy="20"
+              rx="12"
+              ry="14"
+              fill="#06b6d4"
+              opacity="0.9"
+            />
+            <!-- Left Eye -->
+            <circle cx="42" cy="28" r="4" fill="#ffffff" />
+            <!-- Right Eye -->
+            <circle cx="58" cy="28" r="4" fill="#ffffff" />
+            <!-- Nose -->
+            <ellipse cx="50" cy="35" rx="3" ry="2" fill="#ffffff" />
+            <!-- Mouth -->
+            <path
+              d="M 45 40 Q 50 43 55 40"
+              stroke="#ffffff"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+            />
+            <!-- Highlight -->
+            <ellipse
+              cx="45"
+              cy="25"
+              rx="6"
+              ry="8"
+              fill="#ffffff"
+              opacity="0.3"
+            />
+          </svg>
           <span
-            class="h-2 w-2 rotate-45 rounded-sm border border-cyan-400/50 bg-cyan-600 group-hover:animate-spin"
-          ></span>
-          <span
-            class="text-sm font-semibold uppercase tracking-tight text-white transition-colors group-hover:text-cyan-400"
-            >Blue Melly Games</span
+            class="text-sm font-semibold uppercase tracking-tight text-white opacity-0 transition-opacity transition-colors group-hover:opacity-100 group-hover:text-cyan-400"
+            >BLUE MELLY GAMES</span
           >
         </a>
 
@@ -352,8 +465,8 @@
           class="hidden items-center space-x-8 text-[11px] font-medium uppercase tracking-widest text-neutral-300 md:flex"
         >
           <a href="#nexus" class="transition-colors hover:text-white">Home</a>
-          <a href="#about" class="transition-colors hover:text-white">About</a>
           <a href="#games" class="transition-colors hover:text-white">Games</a>
+          <a href="#about" class="transition-colors hover:text-white">About</a>
           <a href="#transmission" class="transition-colors hover:text-white"
             >Contact</a
           >
@@ -368,8 +481,15 @@
           <span class="iconify" data-icon="lucide:arrow-down-right"></span>
         </a>
 
-        <!-- Mobile Burger -->
-        <button id="mobile-menu-btn" aria-label="Toggle menu" class="relative z-50 p-2 text-white md:hidden">
+        <!-- Mobile Burger (updated aria state) -->
+        <button
+          id="mobile-menu-btn"
+          type="button"
+          aria-label="Toggle menu"
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+          class="relative z-50 p-2 text-white md:hidden"
+        >
           <span
             id="burger-icon"
             class="iconify h-6 w-6 transition-transform"
@@ -379,9 +499,11 @@
       </div>
     </nav>
 
-    <!-- ===== Mobile Menu Overlay (outside nav to avoid backdrop-filter containing block) ===== -->
+    <!-- ===== Mobile Menu Overlay (updated: hidden + aria-hidden) ===== -->
     <div
       id="mobile-menu"
+      hidden
+      aria-hidden="true"
       class="fixed inset-0 z-40 flex flex-col items-center justify-center space-y-8 bg-black/80 opacity-0 pointer-events-none backdrop-blur-xl transition-all duration-300"
     >
       <a
@@ -390,14 +512,14 @@
         >Home</a
       >
       <a
-        href="#about"
-        class="mobile-link-item text-4xl font-black uppercase tracking-tighter text-white drop-shadow-lg transition-colors hover:text-cyan-400"
-        >About</a
-      >
-      <a
         href="#games"
         class="mobile-link-item text-4xl font-black uppercase tracking-tighter text-white drop-shadow-lg transition-colors hover:text-cyan-400"
         >Games</a
+      >
+      <a
+        href="#about"
+        class="mobile-link-item text-4xl font-black uppercase tracking-tighter text-white drop-shadow-lg transition-colors hover:text-cyan-400"
+        >About</a
       >
       <a
         href="#transmission"
@@ -406,19 +528,114 @@
       >
     </div>
 
+    <!-- ===== Beta signup modal (updated aria-describedby + no inline onclick) ===== -->
+    <div
+      id="beta-modal"
+      class="beta-modal-hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      aria-modal="true"
+      aria-labelledby="beta-modal-title"
+      aria-describedby="beta-modal-desc"
+      role="dialog"
+    >
+      <div
+        class="relative w-full max-w-md rounded-xl border border-white/10 bg-neutral-900 p-6 shadow-xl"
+        data-beta-dialog
+      >
+        <button
+          id="beta-modal-close"
+          type="button"
+          aria-label="Close"
+          class="absolute right-4 top-4 rounded p-1 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <span class="iconify h-5 w-5" data-icon="lucide:x"></span>
+        </button>
+        <h2
+          id="beta-modal-title"
+          class="mb-3 text-lg font-bold uppercase tracking-tight text-white"
+        >
+          Beta access
+        </h2>
+        <p id="beta-modal-desc" class="mb-6 text-sm text-neutral-400">
+          Enter your email for beta-access and a unique in-game reward at launch.
+        </p>
+        <form
+          id="beta-form"
+          action="https://formsubmit.co/moarbetsy@gmail.com"
+          method="POST"
+          class="space-y-4"
+        >
+          <input
+            type="hidden"
+            name="_subject"
+            value="Beta signup – Blue Melly Games"
+          />
+          <input
+            type="hidden"
+            name="_next"
+            id="beta-form-next"
+            value="https://moarbetsy.github.io/GameStudPhil/#beta-thanks"
+          />
+          <input type="hidden" name="_captcha" value="false" />
+          <input
+            type="text"
+            name="_honey"
+            class="beta-honeypot"
+            tabindex="-1"
+            autocomplete="off"
+          />
+          <div>
+            <label
+              for="beta-email"
+              class="mb-1 block text-xs font-medium uppercase tracking-wider text-neutral-500"
+              >Email</label
+            >
+            <input
+              id="beta-email"
+              type="email"
+              name="email"
+              required
+              placeholder="you@example.com"
+              class="w-full rounded border border-white/10 bg-neutral-800 px-4 py-2.5 text-white placeholder:text-neutral-500 focus:border-cyan-400/50 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-sm bg-cyan-500 px-4 py-2.5 text-sm font-bold uppercase tracking-tight text-black transition-colors hover:bg-cyan-400"
+          >
+            Sign up
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Thank-you toast (after FormSubmit redirect to #beta-thanks) ===== -->
+    <div
+      id="beta-thanks-toast"
+      class="beta-toast-hidden fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-cyan-400/30 bg-neutral-900 px-6 py-4 text-center shadow-xl"
+    >
+      <p class="text-sm font-medium text-white">
+        Thanks for signing up. You're on the list for beta and your in-game
+        reward.
+      </p>
+    </div>
+
     <!-- ===== Section 1: Hero ===== -->
-    <header id="nexus" class="relative flex h-screen flex-col overflow-hidden bg-black">
+    <header
+      id="nexus"
+      class="relative flex h-screen flex-col overflow-hidden bg-black"
+    >
       <!-- YouTube Video Background (auto-plays muted) -->
       <div class="video-background-wrapper">
         <div class="video-overlay opacity-60"></div>
         <iframe
           id="youtube-player"
           class="video-iframe"
-          src="https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=9"
+          src="https://www.youtube.com/embed/h7MYJghRWt0?autoplay=1&mute=1&controls=0&loop=1&playlist=h7MYJghRWt0&rel=0&iv_load_policy=3&playsinline=1&start=10&modestbranding=1"
           title="Background Video"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
           tabindex="-1"
+          referrerpolicy="strict-origin-when-cross-origin"
         ></iframe>
       </div>
 
@@ -431,6 +648,14 @@
       <div
         class="relative z-20 flex flex-grow flex-col items-start justify-end px-6 pb-16 md:pb-20"
       >
+        <button
+          id="beta-cta-btn"
+          type="button"
+          class="mb-6 inline-flex items-center gap-2 rounded-sm border border-cyan-400/50 bg-cyan-400/10 px-5 py-2.5 text-sm font-bold uppercase tracking-tight text-cyan-300 transition-colors hover:border-cyan-400 hover:bg-cyan-400/20 hover:text-white"
+        >
+          <span class="iconify" data-icon="lucide:mail-plus"></span>
+          Get beta access
+        </button>
         <div id="typing-wrapper" class="typing-wrapper typing-cursor text-left">
           <span
             id="type-part-1"
@@ -445,29 +670,12 @@
       </div>
     </header>
 
-    <!-- ===== Section 2: About ===== -->
-    <section id="about" class="relative overflow-hidden bg-black py-32">
-      <div class="relative z-20 mx-auto max-w-7xl px-6">
-        <div
-          class="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-neutral-900/30 p-12 backdrop-blur-sm"
-        >
-          <div class="space-y-6 text-center">
-            <h2
-              class="text-4xl font-bold uppercase tracking-tighter text-white md:text-6xl"
-            >
-              About
-            </h2>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Section 3: Games ===== -->
+    <!-- ===== Section 2: Games ===== -->
     <section id="games" class="relative overflow-hidden bg-black py-32">
       <div class="relative z-20 mx-auto max-w-7xl px-6">
         <div class="mb-12 text-center">
           <h2
-            class="text-4xl font-bold uppercase tracking-tighter text-white md:text-6xl"
+            class="text-3xl font-bold uppercase tracking-tighter text-white md:text-5xl"
           >
             Games
           </h2>
@@ -486,15 +694,14 @@
                 data-icon="lucide:gamepad-2"
               ></span>
             </div>
-            <h3
-              class="text-lg font-bold uppercase tracking-tight text-white"
-            >
+            <h3 class="text-lg font-bold uppercase tracking-tight text-white">
               Coming Soon
             </h3>
             <p class="mt-2 text-sm text-neutral-400">
               Our first title is in development. Stay tuned for announcements.
             </p>
           </div>
+
           <!-- Game Card 2 -->
           <div
             class="group rounded-xl border border-white/5 bg-neutral-900/30 p-6 backdrop-blur-sm transition-all hover:border-cyan-400/30 hover:bg-neutral-900/50"
@@ -507,15 +714,14 @@
                 data-icon="lucide:swords"
               ></span>
             </div>
-            <h3
-              class="text-lg font-bold uppercase tracking-tight text-white"
-            >
+            <h3 class="text-lg font-bold uppercase tracking-tight text-white">
               Coming Soon
             </h3>
             <p class="mt-2 text-sm text-neutral-400">
               Something exciting is brewing. More details coming soon.
             </p>
           </div>
+
           <!-- Game Card 3 -->
           <div
             class="group rounded-xl border border-white/5 bg-neutral-900/30 p-6 backdrop-blur-sm transition-all hover:border-cyan-400/30 hover:bg-neutral-900/50"
@@ -528,14 +734,30 @@
                 data-icon="lucide:trophy"
               ></span>
             </div>
-            <h3
-              class="text-lg font-bold uppercase tracking-tight text-white"
-            >
+            <h3 class="text-lg font-bold uppercase tracking-tight text-white">
               Coming Soon
             </h3>
             <p class="mt-2 text-sm text-neutral-400">
               A new adventure awaits. Follow us for updates.
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: About ===== -->
+    <section id="about" class="relative overflow-hidden bg-black py-24">
+      <div class="relative z-20 mx-auto max-w-7xl px-6">
+        <div
+          class="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-neutral-900/30 p-12 backdrop-blur-sm"
+        >
+          <div class="space-y-6 text-center">
+            <h2
+              class="text-3xl font-bold uppercase tracking-tighter text-white md:text-5xl"
+            >
+              About
+            </h2>
+            <p class="text-neutral-400">Solo game dev from Montreal</p>
           </div>
         </div>
       </div>
@@ -580,35 +802,65 @@
       </div>
     </section>
 
-    <!-- ===== Scripts ===== -->
+    <!-- ===== Scripts (updated, safe drop-in) ===== -->
     <script>
-      // --- Loader & Typing ---
-      window.addEventListener("load", function () {
-        setTimeout(function () {
-          var loader = document.getElementById("loader");
-          loader.classList.add("loader-hidden");
-          // Wait for opacity transition to end, then remove from DOM
-          loader.addEventListener(
-            "transitionend",
-            function () {
-              loader.style.display = "none";
-            },
-            { once: true }
-          );
-          // Fallback in case transitionend doesn't fire
-          setTimeout(function () {
-            loader.style.display = "none";
-          }, 700);
-          startTypingSequence();
-        }, 1000);
-      });
+      // ============================
+      // Utilities
+      // ============================
+      function getFocusable(container) {
+        if (!container) return [];
+        return Array.prototype.slice.call(
+          container.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        );
+      }
 
+      function trapFocus(container, e) {
+        if (!container || e.key !== "Tab") return;
+
+        var focusables = getFocusable(container);
+        if (!focusables.length) return;
+
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+
+      // Scroll locking that won't fight between menu + modal
+      var scrollLocks = 0;
+      function lockScroll() {
+        scrollLocks++;
+        document.body.style.overflow = "hidden";
+      }
+      function unlockScroll() {
+        scrollLocks = Math.max(0, scrollLocks - 1);
+        if (scrollLocks === 0) document.body.style.overflow = "";
+      }
+
+      // ============================
+      // Loader & Typing
+      // ============================
       function startTypingSequence() {
         var text1 = "BLUE MELLY GAMES.";
         var text2 = "Montreal";
         var el1 = document.getElementById("type-part-1");
         var el2 = document.getElementById("type-part-2");
         var typingWrapper = document.getElementById("typing-wrapper");
+
+        if (!el1 || !el2 || !typingWrapper) return;
+
+        el1.textContent = "";
+        el2.textContent = "";
+
         var i = 0;
 
         function typeFirstPart() {
@@ -637,49 +889,226 @@
         typeFirstPart();
       }
 
-      // --- Mobile Menu Logic ---
+      var booted = false;
+
+      function hideLoaderAndStart() {
+        if (booted) return;
+        booted = true;
+
+        var loader = document.getElementById("loader");
+        if (!loader) {
+          startTypingSequence();
+          return;
+        }
+
+        loader.classList.add("loader-hidden");
+
+        loader.addEventListener(
+          "transitionend",
+          function () {
+            loader.style.display = "none";
+          },
+          { once: true }
+        );
+
+        // Fallback in case transitionend doesn't fire
+        setTimeout(function () {
+          loader.style.display = "none";
+        }, 800);
+
+        startTypingSequence();
+      }
+
+      // Failsafe: don't leave users stuck forever if "load" is delayed
+      var loaderFailsafe = setTimeout(function () {
+        hideLoaderAndStart();
+      }, 4000);
+
+      window.addEventListener("load", function () {
+        clearTimeout(loaderFailsafe);
+        setTimeout(function () {
+          hideLoaderAndStart();
+        }, 1000);
+      });
+
+      // ============================
+      // Mobile Menu
+      // ============================
       var menuBtn = document.getElementById("mobile-menu-btn");
       var mobileMenu = document.getElementById("mobile-menu");
       var burgerIcon = document.getElementById("burger-icon");
       var mobileLinkItems = document.querySelectorAll(".mobile-link-item");
       var isMenuOpen = false;
+      var lastMenuFocus = null;
 
-      menuBtn.addEventListener("click", function () {
-        isMenuOpen = !isMenuOpen;
-        if (isMenuOpen) {
+      function openMenu() {
+        if (!menuBtn || !mobileMenu) return;
+
+        isMenuOpen = true;
+        lastMenuFocus = document.activeElement;
+
+        menuBtn.setAttribute("aria-expanded", "true");
+        mobileMenu.hidden = false;
+        mobileMenu.setAttribute("aria-hidden", "false");
+
+        // Allow transitions to run after un-hiding
+        requestAnimationFrame(function () {
           mobileMenu.classList.remove("opacity-0", "pointer-events-none");
           mobileMenu.classList.add(
             "opacity-100",
             "pointer-events-auto",
             "menu-open"
           );
-          document.body.style.overflow = "hidden";
-          burgerIcon.setAttribute("data-icon", "lucide:x");
+        });
+
+        lockScroll();
+        if (burgerIcon) burgerIcon.setAttribute("data-icon", "lucide:x");
+
+        // Focus first link for keyboard users
+        var firstLink = mobileMenu.querySelector(".mobile-link-item");
+        if (firstLink) firstLink.focus({ preventScroll: true });
+      }
+
+      function closeMenu() {
+        if (!menuBtn || !mobileMenu) return;
+
+        isMenuOpen = false;
+
+        menuBtn.setAttribute("aria-expanded", "false");
+        mobileMenu.classList.remove(
+          "opacity-100",
+          "pointer-events-auto",
+          "menu-open"
+        );
+        mobileMenu.classList.add("opacity-0", "pointer-events-none");
+
+        unlockScroll();
+        if (burgerIcon) burgerIcon.setAttribute("data-icon", "lucide:menu");
+
+        // After transition, hide from layout and accessibility tree
+        setTimeout(function () {
+          mobileMenu.hidden = true;
+          mobileMenu.setAttribute("aria-hidden", "true");
+        }, 320);
+
+        // Restore focus
+        if (lastMenuFocus && typeof lastMenuFocus.focus === "function") {
+          lastMenuFocus.focus({ preventScroll: true });
         } else {
-          mobileMenu.classList.remove(
-            "opacity-100",
-            "pointer-events-auto",
-            "menu-open"
-          );
-          mobileMenu.classList.add("opacity-0", "pointer-events-none");
-          document.body.style.overflow = "";
-          burgerIcon.setAttribute("data-icon", "lucide:menu");
+          menuBtn.focus({ preventScroll: true });
+        }
+      }
+
+      if (menuBtn) {
+        menuBtn.addEventListener("click", function () {
+          if (!isMenuOpen) openMenu();
+          else closeMenu();
+        });
+      }
+
+      // Close when clicking a link
+      mobileLinkItems.forEach(function (link) {
+        link.addEventListener("click", function () {
+          closeMenu();
+        });
+      });
+
+      // Close when clicking the overlay background
+      if (mobileMenu) {
+        mobileMenu.addEventListener("click", function (e) {
+          if (e.target === mobileMenu) closeMenu();
+        });
+      }
+
+      // ============================
+      // Beta modal & thank-you toast
+      // ============================
+      var betaCtaBtn = document.getElementById("beta-cta-btn");
+      var betaModal = document.getElementById("beta-modal");
+      var betaModalClose = document.getElementById("beta-modal-close");
+      var betaFormNext = document.getElementById("beta-form-next");
+      var betaThanksToast = document.getElementById("beta-thanks-toast");
+      var betaDialog = betaModal
+        ? betaModal.querySelector("[data-beta-dialog]")
+        : null;
+      var lastModalFocus = null;
+
+      if (betaFormNext) {
+        betaFormNext.value = window.location.href.split("#")[0] + "#beta-thanks";
+      }
+
+      // Stop overlay click from closing when clicking inside the dialog (no inline onclick)
+      if (betaDialog) {
+        betaDialog.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      }
+
+      function openBetaModal() {
+        if (!betaModal) return;
+        lastModalFocus = document.activeElement;
+
+        betaModal.classList.remove("beta-modal-hidden");
+        lockScroll();
+
+        if (betaModalClose) betaModalClose.focus({ preventScroll: true });
+      }
+
+      function closeBetaModal() {
+        if (!betaModal) return;
+
+        betaModal.classList.add("beta-modal-hidden");
+        unlockScroll();
+
+        if (lastModalFocus && typeof lastModalFocus.focus === "function") {
+          lastModalFocus.focus({ preventScroll: true });
+        } else if (betaCtaBtn) {
+          betaCtaBtn.focus({ preventScroll: true });
+        }
+      }
+
+      if (betaCtaBtn) betaCtaBtn.addEventListener("click", openBetaModal);
+      if (betaModalClose) betaModalClose.addEventListener("click", closeBetaModal);
+
+      if (betaModal) {
+        betaModal.addEventListener("click", function (e) {
+          if (e.target === betaModal) closeBetaModal();
+        });
+      }
+
+      // Keyboard: Escape + focus trap (modal) + Escape for mobile menu
+      document.addEventListener("keydown", function (e) {
+        // Modal open?
+        var modalOpen =
+          betaModal && !betaModal.classList.contains("beta-modal-hidden");
+
+        if (modalOpen) {
+          if (e.key === "Escape") {
+            closeBetaModal();
+            return;
+          }
+          trapFocus(betaDialog || betaModal, e);
+          return;
+        }
+
+        // Menu open?
+        if (isMenuOpen && e.key === "Escape") {
+          closeMenu();
         }
       });
 
-      mobileLinkItems.forEach(function (link) {
-        link.addEventListener("click", function () {
-          isMenuOpen = false;
-          mobileMenu.classList.remove(
-            "opacity-100",
-            "pointer-events-auto",
-            "menu-open"
+      // Toast
+      if (betaThanksToast && window.location.hash === "#beta-thanks") {
+        betaThanksToast.classList.remove("beta-toast-hidden");
+        setTimeout(function () {
+          betaThanksToast.classList.add("beta-toast-hidden");
+          history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search
           );
-          mobileMenu.classList.add("opacity-0", "pointer-events-none");
-          document.body.style.overflow = "";
-          burgerIcon.setAttribute("data-icon", "lucide:menu");
-        });
-      });
+        }, 6000);
+      }
     </script>
   </body>
 </html>
